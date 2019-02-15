@@ -3,30 +3,16 @@ from werkzeug.utils import secure_filename
 import string
 import os
 import random
-from settings import settings
+from settings import settings, secrets
 import json
-from settings import secrets
-from werkzeug import exceptions
+import werkzeug
+
 
 app = Flask(__name__)
 
 folder = "pictures"
 
 extensions = ["png", "jpg", "mp4"]
-
-
-def upload(request):
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            return redirect(request.url)
-        if allowed(file.filename):
-            filename = random_string() + secure_filename(file.filename)
-            file.save(os.path.join(folder, filename))
-            return redirect(url_for("picture", picture_name=filename))
-
 
 
 def random_string():
@@ -44,8 +30,17 @@ def index():
 
 @app.route("/upload", methods=["POST", "GET"])
 def normal_upload():
-    print(request.files)
-    upload(request)
+    if type(request.user_agent) == werkzeug.useragents.UserAgent:
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                return redirect(request.url)
+            file = request.files['file']
+            if file.filename == '':
+                return redirect(request.url)
+            if allowed(file.filename):
+                filename = random_string() + secure_filename(file.filename)
+                file.save(os.path.join(folder, filename))
+                return redirect(url_for("picture", picture_name=filename))
     return render_template("upload.html")
 
 
@@ -56,15 +51,21 @@ def api():
 
 @app.route("/api/upload", methods=['POST'])
 def api_upload():
-    print(json.dumps(request.form))
-
-    #postedjson = json.loads(request.data.decode('utf-8'))
-    #print(postedjson)
-    #if postedjson['api_key'] == secrets.API_KEY:
-    #    print("1")
-    #    upload(request)
-    #else:
-    #    abort(418)
+    postedjson = json.dumps(request.form)
+    postedjson = json.loads(postedjson)
+    if postedjson['api_key'] == secrets.API_KEY:
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                return redirect(request.url)
+            file = request.files['file']
+            if file.filename == '':
+                return redirect(request.url)
+            if allowed(file.filename):
+                filename = random_string() + secure_filename(file.filename)
+                file.save(os.path.join(folder, filename))
+                return redirect(url_for("picture", picture_name=filename))
+    else:
+        abort(418)
     return "succes"
 
 
@@ -73,7 +74,7 @@ def picture(picture_name):
     return send_file("pictures\\"+picture_name)
 
 
-#@app.errorhandler(exceptions.ImATeapot)
+@app.errorhandler(werkzeug.exceptions.ImATeapot)
 
 
 def main():

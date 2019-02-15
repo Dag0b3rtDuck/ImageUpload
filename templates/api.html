@@ -5,10 +5,12 @@
     <title>Api</title>
 </head>
 <body>
-    <p>Upload a picture: { <br/>
-        api_key: ask me to get one
-        <br/>}
-
+    <p>Upload Picture: { file: }<br>
+                        {api_key: YOUR API KEY}<br>
+        <br>
+        Example in Python: file = {"file": open("PATH TO FILE", "rb")}<br/>
+        key = {"api_key": "YOUR API KEY"} #API key is defined in secrets.py <br/>
+        p = requests.post("http://127.0.0.1:1337/api/upload", data=key, files=file)
     </p>
 
 </body>

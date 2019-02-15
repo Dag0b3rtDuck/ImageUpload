@@ -1,7 +1,7 @@
 import pyscreenshot
 import requests
 
-def take_scren():
+def take_screen():
     image = im = pyscreenshot.grab()
     im.save("C:\\Users\\username\\Pictures\\screenshot.jpg") #insert your username instead of username
     im.show()
